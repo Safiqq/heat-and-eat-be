@@ -30,7 +30,6 @@ h11==0.14.0
 httplib2==0.22.0
 idna==3.6
 isort==5.13.2
-jose==1.0.0
 mccabe==0.7.0
 msgpack==1.0.7
 mypy-extensions==1.0.0
@@ -43,7 +42,7 @@ protobuf==4.25.2
 pyasn1==0.5.1
 pyasn1-modules==0.3.0
 pycparser==2.21
-pydantic==1.10.9
+pydantic==2.5.3
 pydantic-core==2.14.6
 PyJWT==2.8.0
 pylint==3.0.3
