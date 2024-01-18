@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel
+from pydantic.v1 import root_validator
 
 
 class Order(BaseModel):
@@ -20,7 +21,7 @@ class Order(BaseModel):
         validate_assignment = True
 
     @root_validator
-    def number_validator(self, _, values):
+    def number_validator(_, values):
         values["updated_at"] = datetime.now()
         return values
 
