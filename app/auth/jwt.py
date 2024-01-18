@@ -34,7 +34,7 @@ def get_user(token: str = Depends(oauth2_scheme)):
     payload = verify_token(token)
 
     def credentials_exception(detail: str):
-        return HTTPException(
+        raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
             detail=detail,
             headers={"WWW-Authenticate": "Bearer"},

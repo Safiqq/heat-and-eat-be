@@ -50,7 +50,7 @@ async def register(payload_data: User):
     return {"message": f"User created successfully with ID {doc.id}"}
 
 
-@user_router.get("/users/")
+@user_router.get("/me")
 async def read_user_by_email(user: dict = Depends(get_current_user)):
     if not user:
         raise HTTPException(

@@ -5,7 +5,6 @@ from pydantic.v1 import root_validator
 
 
 class Order(BaseModel):
-    user_id: str
     items_id: List[str]
     address_id: str
     price: int

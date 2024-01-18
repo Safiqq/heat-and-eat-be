@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException, status, Depends
 from auth.jwt import get_current_user
 from service import db
 from schemas.review import Review
@@ -17,6 +17,11 @@ async def create_review(review: Review, user: dict = Depends(get_current_user)):
 @review_router.get("/reviews/{review_id}", response_model=dict)
 async def read_review_by_id(review_id, _: dict = Depends(get_current_user)):
     review = db.collection("reviews").document(review_id).get()
+    if not review.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review with ID {review_id} not found",
+        )
     return {"id": review.id, **review.to_dict()}
 
 
@@ -32,13 +37,25 @@ async def read_reviews(user: dict = Depends(get_current_user)):
 
 @review_router.patch("/reviews/{review_id}")
 async def update_review_by_id(
-    review_id: str, review: dict, _: dict = Depends(get_current_user)
+    review_id: str, payload_review: dict, _: dict = Depends(get_current_user)
 ):
-    db.collection("reviews").document(review_id).update(review)
+    review = db.collection("reviews").document(review_id).get()
+    if not review.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review with ID {review_id} not found",
+        )
+    db.collection("reviews").document(review_id).update(payload_review)
     return {"message": f"Review with ID {review_id} updated successfully"}
 
 
 @review_router.delete("/reviews/{review_id}")
 async def delete_review_by_id(review_id: str, _: dict = Depends(get_current_user)):
+    review = db.collection("reviews").document(review_id).get()
+    if not review.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review with ID {review_id} not found",
+        )
     db.collection("reviews").document(review_id).delete()
     return {"message": f"Review with ID {review_id} deleted successfully"}

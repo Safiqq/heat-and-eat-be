@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException, status, Depends
 from auth.jwt import get_current_user
 from service import db
 from schemas.address import Address
@@ -19,6 +19,11 @@ async def create_address(address: Address, user: dict = Depends(get_current_user
 @address_router.get("/addresses/{address_id}", response_model=dict)
 async def read_address_by_id(address_id, _: dict = Depends(get_current_user)):
     address = db.collection("addresses").document(address_id).get()
+    if not address.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Address with ID {address_id} not found",
+        )
     return {"id": address.id, **address.to_dict()}
 
 
@@ -34,13 +39,25 @@ async def read_addresses(user: dict = Depends(get_current_user)):
 
 @address_router.patch("/addresses/{address_id}")
 async def update_address_by_id(
-    address_id: str, address: dict, _: dict = Depends(get_current_user)
+    address_id: str, payload_address: dict, _: dict = Depends(get_current_user)
 ):
-    db.collection("addresses").document(address_id).update(address)
+    address = db.collection("addresses").document(address_id).get()
+    if not address.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Address with ID {address_id} not found",
+        )
+    db.collection("addresses").document(address_id).update(payload_address)
     return {"message": f"Address with ID {address_id} updated successfully"}
 
 
 @address_router.delete("/addresses/{address_id}")
 async def delete_address_by_id(address_id: str, _: dict = Depends(get_current_user)):
+    address = db.collection("addresses").document(address_id).get()
+    if not address.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Address with ID {address_id} not found",
+        )
     db.collection("addresses").document(address_id).delete()
     return {"message": f"Address with ID {address_id} deleted successfully"}

@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException, status, Depends
 from auth.jwt import get_current_user
 from service import db
 from schemas.order import Order
@@ -17,6 +17,11 @@ async def create_order(order: Order, user: dict = Depends(get_current_user)):
 @order_router.get("/orders/{order_id}", response_model=dict)
 async def read_order_by_id(order_id, _: dict = Depends(get_current_user)):
     order = db.collection("orders").document(order_id).get()
+    if not order.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Order with ID {order_id} not found",
+        )
     return {"id": order.id, **order.to_dict()}
 
 
@@ -32,13 +37,25 @@ async def read_orders(user: dict = Depends(get_current_user)):
 
 @order_router.patch("/orders/{order_id}")
 async def update_order_by_id(
-    order_id: str, order: dict, _: dict = Depends(get_current_user)
+    order_id: str, payload_order: dict, _: dict = Depends(get_current_user)
 ):
-    db.collection("orders").document(order_id).update(order)
+    order = db.collection("orders").document(order_id).get()
+    if not order.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Order with ID {order_id} not found",
+        )
+    db.collection("orders").document(order_id).update(payload_order)
     return {"message": f"Order with ID {order_id} updated successfully"}
 
 
 @order_router.delete("/orders/{order_id}")
 async def delete_order_by_id(order_id: str, _: dict = Depends(get_current_user)):
+    order = db.collection("orders").document(order_id).get()
+    if not order.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Order with ID {order_id} not found",
+        )
     db.collection("orders").document(order_id).delete()
     return {"message": f"Order with ID {order_id} deleted successfully"}

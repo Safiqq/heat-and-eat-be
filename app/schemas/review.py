@@ -3,11 +3,10 @@ from pydantic import BaseModel
 
 
 class Review(BaseModel):
-    user_id: str
     item_id: str
     shop_id: str
     review: str
-    rating: str
+    rating: int
     images_id: List[str]
 
     def to_dict(self):
