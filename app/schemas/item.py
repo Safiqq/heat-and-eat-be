@@ -9,6 +9,7 @@ class Item(BaseModel):
     price: int
     calorie: int
     shop_id: str
+    shop_name: str
     reviews_id: List[str]
 
     def to_dict(self):

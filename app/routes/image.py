@@ -24,7 +24,11 @@ async def read_image_by_id(image_id):
             detail=f"Image with ID {image_id} not found",
         )
     image_content = base64.b64decode(image.get("blob"))
-    return StreamingResponse(io.BytesIO(image_content), media_type="image/jpeg", headers={"Content-Disposition": f"inline; filename={image_id}.jpeg"})
+    return StreamingResponse(
+        io.BytesIO(image_content),
+        media_type="image/jpeg",
+        headers={"Content-Disposition": f"inline; filename={image_id}.jpeg"},
+    )
 
 
 @image_router.patch("/images/{image_id}")

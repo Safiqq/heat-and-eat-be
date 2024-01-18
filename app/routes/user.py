@@ -58,6 +58,7 @@ async def read_current_user(user: dict = Depends(get_current_user)):
         )
     return user
 
+
 @user_router.get("/users/{user_id}")
 async def read_user_by_id(user_id: str, _: dict = Depends(get_current_user)):
     user = db.collection("users").document(user_id).get()
