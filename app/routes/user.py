@@ -51,9 +51,19 @@ async def register(payload_data: User):
 
 
 @user_router.get("/me")
-async def read_user_by_email(user: dict = Depends(get_current_user)):
+async def read_current_user(user: dict = Depends(get_current_user)):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user account"
         )
     return user
+
+@user_router.get("/users/{user_id}")
+async def read_user_by_id(user_id: str, _: dict = Depends(get_current_user)):
+    user = db.collection("users").document(user_id).get()
+    if not user.exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {user_id} not found",
+        )
+    return {"id": user.id, **user.to_dict()}
